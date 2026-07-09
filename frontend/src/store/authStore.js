@@ -1,9 +1,13 @@
 import { create } from 'zustand'
 import api from '../api'
 
+// ล้าง session ทุกครั้งที่เปิดแอป
+localStorage.removeItem('token')
+localStorage.removeItem('user')
+
 export const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
-  token: localStorage.getItem('token'),
+  user: null,
+  token: null,
 
   login: async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
