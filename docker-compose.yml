@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: beerpos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: beerpos
+      POSTGRES_PASSWORD: beerpos123
+      POSTGRES_DB: beerpos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '5432:5432'
+    networks:
+      - beerpos_net
+
+  backend:
+    build: ./backend
+    container_name: beerpos_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://beerpos:beerpos123@db:5432/beerpos
+      JWT_SECRET: supersecretjwt
+      PORT: 4000
+    ports:
+      - '4000:4000'
+    depends_on:
+      - db
+    networks:
+      - beerpos_net
+
+  frontend:
+    build: ./frontend
+    container_name: beerpos_frontend
+    restart: unless-stopped
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend
+    networks:
+      - beerpos_net
+
+volumes:
+  pgdata:
+
+networks:
+  beerpos_net:
